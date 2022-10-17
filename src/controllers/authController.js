@@ -63,7 +63,7 @@ export async function SingUp (req, res) {
 
 export async function SingIn (req, res) {
     const { email, password } = req.body;
-
+    
     const loginSchema = joi.object({
         email: joi.string().email().required(),
         password: joi.string().min(6).required()
