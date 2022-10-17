@@ -57,7 +57,6 @@ export async function SingUp (req, res) {
 
     } catch (error) {
         res.sendStatus(500);
-        
     }
 }
 
