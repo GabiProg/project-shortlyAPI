@@ -9,7 +9,7 @@ const user = 'postgres';
 const password = `${process.env.PASSWORD}`;
 const host = 'localhost';
 const port = 5432;
-const database = 'shortly';
+const database = `${process.env.DATABASE_URL}`;
 
 const connection = new Pool({
     user,

@@ -72,7 +72,7 @@ export async function SingIn (req, res) {
     try {
         const findUser = await connection.query(`SELECT * FROM users WHERE email = $1;`, [email]);
         const filterUser = findUser.rows.map(item => item.email);
-        const filterEmail = findUser.rows.map(item => item.id);
+        const filterId = findUser.rows.map(item => item.id);
         
         const token = jwt.sign(dados, chaveSecreta, { expiresIn: 60*60*24*30 });
         
@@ -81,7 +81,7 @@ export async function SingIn (req, res) {
         if (filterUser[0] && bcrypt.compareSync(password, filterPassword[0])) {
             await connection.query(
                 `INSERT INTO sessions (token, "userId") VALUES ($1, $2);
-            `, [token, filterEmail[0]]);
+            `, [token, filterId[0]]);
             res.status(200).send({token});
         } else {
             res.status(401).send('Senha ou email incorretos.');
