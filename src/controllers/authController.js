@@ -101,5 +101,6 @@ export async function SingIn (req, res) {
 
     } catch (error) {
         res.sendStatus(500);
+        console.log(error.message);
     }    
 }
