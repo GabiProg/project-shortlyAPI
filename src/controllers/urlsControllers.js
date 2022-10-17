@@ -1,17 +1,8 @@
 import connection from "../dataBase/database.js";
 import { nanoid } from 'nanoid';
-import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
-//const expression = 'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)';
-
-// function validateUrl(value) {
-//     return /^(?:(?:(?:https?|ftp):)?\\/\\/)(?:\\S+(?::\\S*)?@)?(?:(?!(?:10|127)(?:\\.\\d{1,3}){3})(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))(?::\\d{2,5})?(?:[/?#]\\S*)?$/i.test(
-//       value
-//     );
-//   }
 
 export async function shorten (req, res) {
     const { url } = req.body;
@@ -19,10 +10,11 @@ export async function shorten (req, res) {
     const findUser = res.locals.user;
     const filterEmail = res.locals.userEmail;
 
-    // const regex = new RegExp(expression);
-    // if (!url && !url.match(regex)) {
-    //     return res.sendStatus(422);
-    // }
+    const expression = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
+    const regex = new RegExp(expression);
+    if (!url && !url.match(regex)) {
+        return res.sendStatus(422);
+    }
 
     const ID = nanoid(8);
     
@@ -40,7 +32,7 @@ export async function shorten (req, res) {
         const filterId = findUser.rows.map(item => item.id);
         
         await connection.query(`
-            INSERT INTO urls (url, "userId") VALUES ($1, $2);
+            UPDATE urls SET url = $1 WHERE "userId" = $2;
         `, [url, filterId[0]]);
 
         const findUrl = await connection.query(`SELECT * FROM urls WHERE url = $1;`, [url]);

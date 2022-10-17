@@ -42,6 +42,16 @@ export async function SingUp (req, res) {
         await connection.query(`
             INSERT INTO users (name, email, password, "confirmPassword") VALUES ($1, $2, $3, $4);
         `, [name, email, cryptoPassword, cryptoConfirmPassword]);
+
+        const getUser = await connection.query(`
+            SELECT * FROM users WHERE email = $1;
+        `, [email]);
+        
+        const getUserId = getUser.rows.map(item => item.id);
+
+        await connection.query(`
+            INSERT INTO urls ("userId") VALUES ($1);
+        `, [getUserId[0]]);
         
         res.status(201).send('Usuário cadastrado.');
 
@@ -66,7 +76,7 @@ export async function SingIn (req, res) {
         return;
     }
 
-    const chaveSecreta = process.env.JWT_SECRET;
+    const chaveSecreta = process.env.TOKEN_SECRET;
     const dados = {user: email};
     
     try {

@@ -8,7 +8,7 @@ export async function AuthorizeUser (req, res, next) {
     const { authorization } = req.headers;
     const token = authorization?.replace('Bearer ', '');
 
-    const chaveSecreta = process.env.JWT_SECRET;
+    const chaveSecreta = process.env.TOKEN_SECRET;
 
     if (!token) {
         return res.sendStatus(401);
@@ -20,7 +20,7 @@ export async function AuthorizeUser (req, res, next) {
         const filterEmail = findUser.rows.map(item => item.email);
 
         if (!filterEmail[0]) {
-            return res.sendStatus(401);
+            return res.status(404).send('O usuário não foi encontrado.');
         }
 
         res.locals.user = findUser;
