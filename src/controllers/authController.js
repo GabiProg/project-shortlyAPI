@@ -57,6 +57,7 @@ export async function SingUp (req, res) {
 
     } catch (error) {
         res.sendStatus(500);
+        
     }
 }
 
@@ -88,15 +89,18 @@ export async function SingIn (req, res) {
         
         const filterPassword = findUser.rows.map(item => item.password);
         
-        if (filterUser[0] && bcrypt.compareSync(password, filterPassword[0])) {
-            await connection.query(
-                `INSERT INTO sessions (token, "userId") VALUES ($1, $2);
-            `, [token, filterId[0]]);
-            res.status(200).send({token});
-        } else {
-            res.status(401).send('Senha ou email incorretos.');
-        }
+        if (!filterUser[0] && !bcrypt.compareSync(password, filterPassword[0])) {
+            return res.status(401).send('Senha ou email incorretos.');
+        } 
+
+        await connection.query(
+            `INSERT INTO sessions (token, "userId") VALUES ($1, $2);
+        `, [token, filterId[0]]);
+        
+        res.status(200).send({token});
+
     } catch (error) {
         res.sendStatus(500);
+        console.log(error.message);
     }    
 }
