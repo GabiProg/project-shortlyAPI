@@ -162,5 +162,6 @@ export async function DeleteUrl (req, res) {
 
     } catch (error) {
         res.sendStatus(500);
+        console.log(error.message);
     }
 }
