@@ -1,7 +1,6 @@
 import connection from "../dataBase/database.js";
 import { nanoid } from 'nanoid';
 import dotenv from 'dotenv';
-
 dotenv.config();
 
 export async function shorten (req, res) {
@@ -10,10 +9,12 @@ export async function shorten (req, res) {
     const findUser = res.locals.user;
     const filterEmail = res.locals.userEmail;
 
-    const expression = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
+    const expression = 
+    /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/;
     const regex = new RegExp(expression);
-    if (!url && !url.match(regex)) {
-        return res.sendStatus(422);
+
+    if (!url || !url.match(regex)) {
+        return res.status(422).send('Url não foi enviada ou está incorreta.');
     }
 
     const ID = nanoid(8);
@@ -24,18 +25,19 @@ export async function shorten (req, res) {
         `, [url]); 
         
         const validateUrl = alreadyCreatedUrl.rows.map(item => item.url);
-
+        
         if (validateUrl[0]) {
             return res.status(401).send('link já foi encurtado.');
         }
 
         const filterId = findUser.rows.map(item => item.id);
-        
+
         await connection.query(`
-            UPDATE urls SET url = $1 WHERE "userId" = $2;
+                INSERT INTO urls (url, "userId") VALUES ($1, $2);
         `, [url, filterId[0]]);
 
         const findUrl = await connection.query(`SELECT * FROM urls WHERE url = $1;`, [url]);
+        
         const filterUrlId = findUrl.rows.map(item => item.id);
 
         await connection.query(`
@@ -45,11 +47,13 @@ export async function shorten (req, res) {
         const findShortUrl = await connection.query(`
             SELECT * FROM "shortUrls" WHERE "urlId" = $1;
         `, [filterUrlId[0]]);
-        const filterShortUrlId = findShortUrl.rows.map(item => item.shortUrl);
-
+        
+        const filterShortUrlId = findShortUrl.rows.reverse().map(item => item.shortUrl);
+        
         res.status(201).send({shortUrl: filterShortUrlId[0]});
     
     } catch (error) {
+        console.log(error)
         res.sendStatus(500);
     }
 }

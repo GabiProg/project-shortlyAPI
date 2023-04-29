@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import joi from 'joi';
-
 dotenv.config();
 
 export async function SingUp (req, res) {

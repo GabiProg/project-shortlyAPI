@@ -1,7 +1,6 @@
 import connection from '../dataBase/database.js';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-
 dotenv.config();
 
 export async function AuthorizeUser (req, res, next) {
@@ -16,7 +15,10 @@ export async function AuthorizeUser (req, res, next) {
 
     try {
         const dados = jwt.verify(token, chaveSecreta);
-        const findUser = await connection.query(`SELECT * FROM users WHERE email = $1;`, [dados.user]);
+
+        const findUser = await connection.query(`
+            SELECT * FROM users WHERE email = $1;`, [dados.user]);
+            
         const filterEmail = findUser.rows.map(item => item.email);
 
         if (!filterEmail[0]) {
@@ -25,7 +27,7 @@ export async function AuthorizeUser (req, res, next) {
 
         res.locals.user = findUser;
         res.locals.userEmail = filterEmail;
-        next()
+        next();
     } catch (error) {
         res.sendStatus(500);
     }
